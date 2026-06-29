@@ -1,0 +1,25 @@
+using System.ComponentModel.DataAnnotations;
+using InvestmentPortfolio.Core.Enums;
+
+namespace InvestmentPortfolio.Core.Requests.Transactions;
+
+public class CreateTransactionRequest
+{
+    [Required(ErrorMessage = "O ativo é obrigatório")]
+    public Guid AssetId { get; set; }
+
+    [Required(ErrorMessage = "O tipo de operação é obrigatório")]
+    public EOperationType Type { get; set; }
+
+    [Range(0.001, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
+    public decimal Quantity { get; set; }
+
+    [Range(0.01, double.MaxValue, ErrorMessage = "O preço unitário deve ser maior que zero")]
+    public decimal UnitPrice { get; set; }
+
+    [Required(ErrorMessage = "A data é obrigatória")]
+    public DateTime DateBuyorSell { get; set; }
+
+    [Required(ErrorMessage = "A custodiante é obrigatória")]
+    public ECustodian Custodian { get; set; }
+}

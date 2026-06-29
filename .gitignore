@@ -1,0 +1,22 @@
+# .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Node / frontend
+node_modules/
+dist/
+.env
+.env.local
+
+# Rider / JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
