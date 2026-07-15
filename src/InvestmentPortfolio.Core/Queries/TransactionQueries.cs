@@ -17,4 +17,10 @@ public static class TransactionQueries
 
     public static Expression<Func<Transaction, bool>> GetByCustodian(ECustodian custodian)
         => t => !t.IsDeleted && t.Custodian == custodian;
+
+    public static Expression<Func<Transaction, bool>> GetByType(EOperationType type)
+        => t => !t.IsDeleted && t.Side == type;
+
+    public static Expression<Func<Transaction, bool>> GetByPeriod(DateTime dateFrom, DateTime dateTo)
+        => t => !t.IsDeleted && t.DateBuySell >= dateFrom && t.DateBuySell <= dateTo;
 }

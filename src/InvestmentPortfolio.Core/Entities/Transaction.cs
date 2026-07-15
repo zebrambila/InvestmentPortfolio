@@ -9,7 +9,7 @@ public class Transaction : AuditableEntity
     public Asset? Asset { get; private set; }
 
     [Required]
-    public EOperationType Type { get; private set; }
+    public EOperationType Side { get; private set; }
 
     [Range(0.001, double.MaxValue)]
     public decimal Quantity { get; private set; }
@@ -20,7 +20,7 @@ public class Transaction : AuditableEntity
     public decimal TotalValue { get; private set; }
 
     [Required]
-    public DateTime DateBuyorSell { get; private set; }
+    public DateTime DateBuySell { get; private set; }
 
     [Required]
     public ECustodian Custodian { get; private set; }
@@ -33,21 +33,21 @@ public class Transaction : AuditableEntity
     public Transaction(Guid assetId, EOperationType type, decimal quantity, decimal unitPrice, DateTime date, ECustodian custodian)
     {
         AssetId = assetId;
-        Type = type;
+        Side = type;
         Quantity = quantity;
         UnitPrice = unitPrice;
         TotalValue = quantity * unitPrice;
-        DateBuyorSell = date;
+        DateBuySell = date;
         Custodian = custodian;
     }
 
     public void Update(EOperationType type, decimal quantity, decimal unitPrice, DateTime date, ECustodian custodian)
     {
-        Type = type;
+        Side = type;
         Quantity = quantity;
         UnitPrice = unitPrice;
         TotalValue = quantity * unitPrice;
-        DateBuyorSell = date;
+        DateBuySell = date;
         Custodian = custodian;
         Touch();
     }

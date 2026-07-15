@@ -1,4 +1,5 @@
 using InvestmentPortfolio.Core.Entities;
+using InvestmentPortfolio.Core.Enums;
 using InvestmentPortfolio.Core.Handlers;
 using InvestmentPortfolio.Core.Queries;
 using InvestmentPortfolio.Core.Requests.Transactions;
@@ -22,7 +23,7 @@ public class TransactionHandler(InvestmentContext context) : ITransactionHandler
 
             var transaction = new Transaction(
                 request.AssetId, request.Type, request.Quantity,
-                request.UnitPrice, request.DateBuyorSell, request.Custodian);
+                request.UnitPrice, request.DateBuySell, request.Custodian);
 
             context.Transactions.Add(transaction);
             await context.SaveChangesAsync();
@@ -45,7 +46,7 @@ public class TransactionHandler(InvestmentContext context) : ITransactionHandler
             if (transaction is null)
                 return new Response<Transaction?>(null, 404, "Operação não encontrada");
 
-            transaction.Update(request.Type, request.Quantity, request.UnitPrice, request.DateBuyorSell, request.Custodian);
+            transaction.Update(request.Type, request.Quantity, request.UnitPrice, request.DateBuySell, request.Custodian);
             await context.SaveChangesAsync();
 
             return new Response<Transaction?>(transaction, 200, "Operação atualizada com sucesso");
@@ -96,7 +97,7 @@ public class TransactionHandler(InvestmentContext context) : ITransactionHandler
         }
     }
 
-    public async Task<PagedResponse<List<Transaction>?>> GetAllAsync(GetAllTransactionsRequest request)
+    public async Task<TransactionPagedResponse> GetAllAsync(GetAllTransactionsRequest request)
     {
         try
         {
@@ -108,18 +109,32 @@ public class TransactionHandler(InvestmentContext context) : ITransactionHandler
             if (request.Custodian.HasValue)
                 query = query.Where(TransactionQueries.GetByCustodian(request.Custodian.Value));
 
+            if (request.Type.HasValue)
+                query = query.Where(TransactionQueries.GetByType(request.Type.Value));
+
+            if (request.DateFrom.HasValue && request.DateTo.HasValue)
+                query = query.Where(TransactionQueries.GetByPeriod(request.DateFrom.Value, request.DateTo.Value));
+
             var total = await query.CountAsync();
+
+            var summary = new TransactionSummaryResponse
+            {
+                TotalCount = total,
+                VolumeCompra = await query.Where(t => t.Side == EOperationType.Compra).SumAsync(t => (decimal?)t.TotalValue) ?? 0,
+                VolumeVenda  = await query.Where(t => t.Side == EOperationType.Venda).SumAsync(t => (decimal?)t.TotalValue) ?? 0,
+            };
+
             var transactions = await query
-                .OrderByDescending(t => t.DateBuyorSell)
+                .OrderByDescending(t => t.DateBuySell)
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync();
 
-            return new PagedResponse<List<Transaction>?>(transactions, total, request.PageNumber, request.PageSize);
+            return new TransactionPagedResponse(transactions, total, request.PageNumber, request.PageSize, summary);
         }
         catch
         {
-            return new PagedResponse<List<Transaction>?>(null, 0, request.PageNumber, request.PageSize)
+            return new TransactionPagedResponse
             {
                 Code = 500,
                 Message = "Erro ao buscar operações"

@@ -20,14 +20,12 @@ public class DividendMapping : IEntityTypeConfiguration<Dividend>
             .HasColumnType("timestamp without time zone")
             .IsRequired();
 
-        builder.Property(d => d.UnitValue)
-            .HasColumnType("NUMERIC(18,4)");
-
-        builder.Property(d => d.PositionQuantity)
-            .HasColumnType("NUMERIC(18,4)");
-
         builder.Property(d => d.TotalFinancial)
             .HasColumnType("NUMERIC(18,4)");
+
+        builder.Property(d => d.Custodian)
+            .HasConversion<string>()
+            .IsRequired();
 
         builder.Property(d => d.CreatedAt)
             .HasColumnType("timestamp without time zone");

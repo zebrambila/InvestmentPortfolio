@@ -9,7 +9,7 @@ public static class GetAllDividendsEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("v1/dividends", async ([AsParameters] GetAllDividendsRequest request, IDividendHandler handler) =>
+        app.MapGet("v1/dividends/GetAllDividends", async ([AsParameters] GetAllDividendsRequest request, IDividendHandler handler) =>
         {
             var result = await handler.GetAllAsync(request);
             return Results.Ok(result);
@@ -17,7 +17,7 @@ public static class GetAllDividendsEndpoint
         .WithName("GetAllDividends")
         .WithTags("Dividends")
         .WithSummary("Listar dividendos")
-        .WithDescription("Retorna lista paginada de dividendos ativos. Filtra opcionalmente por AssetId.")
+        .WithDescription("Retorna lista paginada de dividendos ativos, incluindo o ativo (com Ticker). Filtra opcionalmente por AssetId e/ou período (DateFrom/DateTo).")
         .Produces<PagedResponse<List<Dividend>>>(StatusCodes.Status200OK);
     }
 }

@@ -8,7 +8,7 @@ public class CreateTransactionRequest
     [Required(ErrorMessage = "O ativo é obrigatório")]
     public Guid AssetId { get; set; }
 
-    [Required(ErrorMessage = "O tipo de operação é obrigatório")]
+    [Required(ErrorMessage = "O tipo de operação é obrigatório (Compra/Venda)")]
     public EOperationType Type { get; set; }
 
     [Range(0.001, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
@@ -18,8 +18,8 @@ public class CreateTransactionRequest
     public decimal UnitPrice { get; set; }
 
     [Required(ErrorMessage = "A data é obrigatória")]
-    public DateTime DateBuyorSell { get; set; }
+    public DateTime DateBuySell { get; set; }
 
-    [Required(ErrorMessage = "A custodiante é obrigatória")]
+    [Required(ErrorMessage = "A custodiante é obrigatória (BTG/Itau)")]
     public ECustodian Custodian { get; set; }
 }

@@ -9,7 +9,7 @@ public static class UpdateTransactionEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapPut("v1/transactions/{id:guid}", async (Guid id, UpdateTransactionRequest request, ITransactionHandler handler) =>
+        app.MapPut("v1/transactions/UpdateTransaction/{id:guid}", async (Guid id, UpdateTransactionRequest request, ITransactionHandler handler) =>
         {
             request.Id = id;
             var result = await handler.UpdateAsync(request);

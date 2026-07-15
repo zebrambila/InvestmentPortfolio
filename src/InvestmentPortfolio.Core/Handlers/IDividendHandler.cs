@@ -11,4 +11,6 @@ public interface IDividendHandler
     Task<Response<Dividend?>> DeleteAsync(DeleteDividendRequest request);
     Task<Response<Dividend?>> GetByIdAsync(GetDividendByIdRequest request);
     Task<PagedResponse<List<Dividend>?>> GetAllAsync(GetAllDividendsRequest request);
+    Task<Response<DividendSummaryByMonthResponse?>> GetSummaryByMonthAsync(GetDividendsSummaryByMonthRequest request);
+    Task<Response<DividendSummaryByAssetResponse?>> GetSummaryByAssetAsync(GetDividendsSummaryByAssetRequest request);
 }

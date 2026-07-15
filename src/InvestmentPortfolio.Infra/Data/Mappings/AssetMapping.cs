@@ -23,6 +23,7 @@ public class AssetMapping : IEntityTypeConfiguration<Asset>
             .HasMaxLength(200);
 
         builder.Property(a => a.Type)
+            .HasConversion<string>()
             .IsRequired();
 
         builder.Property(a => a.CurrentPrice)

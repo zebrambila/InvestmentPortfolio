@@ -9,7 +9,7 @@ public static class UpdateAssetEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapPut("v1/assets/{id:guid}", async (Guid id, UpdateAssetRequest request, IAssetHandler handler) =>
+        app.MapPut("v1/assets/UpdateAsset/{id:guid}", async (Guid id, UpdateAssetRequest request, IAssetHandler handler) =>
         {
             request.Id = id;
             var result = await handler.UpdateAsync(request);

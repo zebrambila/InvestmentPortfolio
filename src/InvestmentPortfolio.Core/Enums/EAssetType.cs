@@ -2,6 +2,6 @@ namespace InvestmentPortfolio.Core.Enums;
 
 public enum EAssetType
 {
-    Acao = 1,
-    FundoImobiliario = 2
+    Ações = 1,
+    FIIs = 2
 }

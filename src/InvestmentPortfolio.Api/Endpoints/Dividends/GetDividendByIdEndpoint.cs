@@ -9,7 +9,7 @@ public static class GetDividendByIdEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("v1/dividends/{id:guid}", async (Guid id, IDividendHandler handler) =>
+        app.MapGet("v1/dividends/GetDividendById/{id:guid}", async (Guid id, IDividendHandler handler) =>
         {
             var result = await handler.GetByIdAsync(new GetDividendByIdRequest { Id = id });
             return result.IsSuccess ? Results.Ok(result) : Results.NotFound(result);

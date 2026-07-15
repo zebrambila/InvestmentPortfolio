@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using InvestmentPortfolio.Core.Enums;
 
 namespace InvestmentPortfolio.Core.Entities;
 
@@ -11,31 +12,29 @@ public class Dividend : AuditableEntity
     public DateTime ReceiptDate { get; private set; }
 
     [Range(0.0001, double.MaxValue)]
-    public decimal UnitValue { get; private set; }
-
-    public decimal PositionQuantity { get; private set; }
     public decimal TotalFinancial { get; private set; }
+
+    [Required]
+    public ECustodian Custodian { get; private set; }
 
     public bool IsDeleted { get; private set; }
     public DateTime? DeletedAt { get; private set; }
 
     private Dividend() { }
 
-    public Dividend(Guid assetId, DateTime receiptDate, decimal unitValue, decimal positionQuantity)
+    public Dividend(Guid assetId, DateTime receiptDate, decimal totalFinancial, ECustodian custodian)
     {
         AssetId = assetId;
         ReceiptDate = receiptDate;
-        UnitValue = unitValue;
-        PositionQuantity = positionQuantity;
-        TotalFinancial = positionQuantity * unitValue;
+        TotalFinancial = totalFinancial;
+        Custodian = custodian;
     }
 
-    public void Update(DateTime receiptDate, decimal unitValue, decimal positionQuantity)
+    public void Update(DateTime receiptDate, decimal totalFinancial, ECustodian custodian)
     {
         ReceiptDate = receiptDate;
-        UnitValue = unitValue;
-        PositionQuantity = positionQuantity;
-        TotalFinancial = positionQuantity * unitValue;
+        TotalFinancial = totalFinancial;
+        Custodian = custodian;
         Touch();
     }
 

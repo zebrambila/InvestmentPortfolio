@@ -9,7 +9,7 @@ public static class GetAllAssetsEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("v1/assets", async ([AsParameters] GetAllAssetsRequest request, IAssetHandler handler) =>
+        app.MapGet("v1/assets/GetAllAssets", async ([AsParameters] GetAllAssetsRequest request, IAssetHandler handler) =>
         {
             var result = await handler.GetAllAsync(request);
             return Results.Ok(result);
@@ -17,7 +17,7 @@ public static class GetAllAssetsEndpoint
         .WithName("GetAllAssets")
         .WithTags("Assets")
         .WithSummary("Listar ativos")
-        .WithDescription("Retorna lista paginada de ativos ativos. Parâmetros: pageNumber (padrão 1), pageSize (padrão 25).")
-        .Produces<PagedResponse<List<Asset>>>(StatusCodes.Status200OK);
+        .WithDescription("Retorna lista paginada de ativos com posição em carteira calculada via transações. Filtra opcionalmente por Type (Ações/FIIs).")
+        .Produces<AssetPagedResponse>(StatusCodes.Status200OK);
     }
 }

@@ -50,8 +50,9 @@ namespace InvestmentPortfolio.Infra.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -62,6 +63,32 @@ namespace InvestmentPortfolio.Infra.Migrations
                         .IsUnique();
 
                     b.ToTable("Assets", (string)null);
+                });
+
+            modelBuilder.Entity("InvestmentPortfolio.Core.Entities.AssetPriceHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ClosePrice")
+                        .HasColumnType("NUMERIC(18,4)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("AssetPriceHistories", (string)null);
                 });
 
             modelBuilder.Entity("InvestmentPortfolio.Core.Entities.Dividend", b =>
@@ -76,22 +103,20 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("Custodian")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<decimal>("PositionQuantity")
-                        .HasColumnType("NUMERIC(18,4)");
-
                     b.Property<DateTime>("ReceiptDate")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("TotalFinancial")
-                        .HasColumnType("NUMERIC(18,4)");
-
-                    b.Property<decimal>("UnitValue")
                         .HasColumnType("NUMERIC(18,4)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -116,10 +141,11 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Custodian")
-                        .HasColumnType("integer");
+                    b.Property<string>("Custodian")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<DateTime>("DateBuyorSell")
+                    b.Property<DateTime>("DateBuySell")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("DateBuyorSell");
 
@@ -132,11 +158,12 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("NUMERIC(18,4)");
 
+                    b.Property<string>("Side")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<decimal>("TotalValue")
                         .HasColumnType("NUMERIC(18,4)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("NUMERIC(18,4)");
@@ -149,6 +176,17 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.HasIndex("AssetId");
 
                     b.ToTable("Transactions", (string)null);
+                });
+
+            modelBuilder.Entity("InvestmentPortfolio.Core.Entities.AssetPriceHistory", b =>
+                {
+                    b.HasOne("InvestmentPortfolio.Core.Entities.Asset", "Asset")
+                        .WithMany()
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Asset");
                 });
 
             modelBuilder.Entity("InvestmentPortfolio.Core.Entities.Dividend", b =>

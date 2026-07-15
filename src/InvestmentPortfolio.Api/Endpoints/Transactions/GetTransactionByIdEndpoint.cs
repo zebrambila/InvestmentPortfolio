@@ -9,7 +9,7 @@ public static class GetTransactionByIdEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("v1/transactions/{id:guid}", async (Guid id, ITransactionHandler handler) =>
+        app.MapGet("v1/transactions/GetTransactionById/{id:guid}", async (Guid id, ITransactionHandler handler) =>
         {
             var result = await handler.GetByIdAsync(new GetTransactionByIdRequest { Id = id });
             return result.IsSuccess ? Results.Ok(result) : Results.NotFound(result);

@@ -26,14 +26,14 @@ public class Asset : AuditableEntity
 
     public Asset(string ticker, string name, EAssetType type)
     {
-        Ticker = ticker;
+        Ticker = ticker.ToUpper();
         Name = name;
         Type = type;
     }
 
     public void Update(string ticker, string name, EAssetType type)
     {
-        Ticker = ticker;
+        Ticker = ticker.ToUpper();
         Name = name;
         Type = type;
         Touch();

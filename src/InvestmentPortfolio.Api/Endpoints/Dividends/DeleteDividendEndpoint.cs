@@ -9,7 +9,7 @@ public static class DeleteDividendEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapDelete("v1/dividends/{id:guid}", async (Guid id, IDividendHandler handler) =>
+        app.MapDelete("v1/dividends/DeleteDividend/{id:guid}", async (Guid id, IDividendHandler handler) =>
         {
             var result = await handler.DeleteAsync(new DeleteDividendRequest { Id = id });
             return result.IsSuccess ? Results.Ok(result) : Results.NotFound(result);

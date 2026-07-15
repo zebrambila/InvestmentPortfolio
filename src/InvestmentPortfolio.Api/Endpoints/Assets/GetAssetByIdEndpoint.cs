@@ -9,7 +9,7 @@ public static class GetAssetByIdEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("v1/assets/{id:guid}", async (Guid id, IAssetHandler handler) =>
+        app.MapGet("v1/assets/GetAssetById/{id:guid}", async (Guid id, IAssetHandler handler) =>
         {
             var result = await handler.GetByIdAsync(new GetAssetByIdRequest { Id = id });
             return result.IsSuccess ? Results.Ok(result) : Results.NotFound(result);

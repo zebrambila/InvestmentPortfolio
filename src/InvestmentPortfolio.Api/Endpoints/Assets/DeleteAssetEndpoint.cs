@@ -9,7 +9,7 @@ public static class DeleteAssetEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapDelete("v1/assets/{id:guid}", async (Guid id, IAssetHandler handler) =>
+        app.MapDelete("v1/assets/DeleteAsset/{id:guid}", async (Guid id, IAssetHandler handler) =>
         {
             var result = await handler.DeleteAsync(new DeleteAssetRequest { Id = id });
             return result.IsSuccess ? Results.Ok(result) : Results.NotFound(result);

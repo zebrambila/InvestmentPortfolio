@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InvestmentPortfolio.Infra.Migrations
 {
     [DbContext(typeof(InvestmentContext))]
-    [Migration("20260627121209_InitialCreate")]
+    [Migration("20260702033549_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,8 +53,9 @@ namespace InvestmentPortfolio.Infra.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -89,7 +90,7 @@ namespace InvestmentPortfolio.Infra.Migrations
                         .HasColumnType("NUMERIC(18,4)");
 
                     b.Property<DateTime>("ReceiptDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("TotalFinancial")
                         .HasColumnType("NUMERIC(18,4)");
@@ -119,11 +120,13 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Custodian")
-                        .HasColumnType("integer");
+                    b.Property<string>("Custodian")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<DateTime>("DateBuyorSell")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<DateTime>("DateBuySell")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DateBuyorSell");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp without time zone");
@@ -134,11 +137,12 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("NUMERIC(18,4)");
 
+                    b.Property<string>("Side")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<decimal>("TotalValue")
                         .HasColumnType("NUMERIC(18,4)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("NUMERIC(18,4)");

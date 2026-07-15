@@ -9,7 +9,7 @@ public static class GetAllTransactionsEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet("v1/transactions", async ([AsParameters] GetAllTransactionsRequest request, ITransactionHandler handler) =>
+        app.MapGet("v1/transactions/GetAllTransactions", async ([AsParameters] GetAllTransactionsRequest request, ITransactionHandler handler) =>
         {
             var result = await handler.GetAllAsync(request);
             return Results.Ok(result);
@@ -17,7 +17,7 @@ public static class GetAllTransactionsEndpoint
         .WithName("GetAllTransactions")
         .WithTags("Transactions")
         .WithSummary("Listar operações")
-        .WithDescription("Retorna lista paginada de operações ativas. Filtra opcionalmente por AssetId e/ou Custodian.")
-        .Produces<PagedResponse<List<Transaction>>>(StatusCodes.Status200OK);
+        .WithDescription("Retorna lista paginada de operações ativas com resumo de volume financeiro. Filtra por AssetId, Custodian, Tipo (Compra/Venda) e/ou período (DateFrom/DateTo).")
+        .Produces<TransactionPagedResponse>(StatusCodes.Status200OK);
     }
 }

@@ -16,7 +16,8 @@ public class TransactionMapping : IEntityTypeConfiguration<Transaction>
             .HasForeignKey(t => t.AssetId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(t => t.Type)
+        builder.Property(t => t.Side)
+            .HasConversion<string>()
             .IsRequired();
 
         builder.Property(t => t.Quantity)
@@ -28,12 +29,13 @@ public class TransactionMapping : IEntityTypeConfiguration<Transaction>
         builder.Property(t => t.TotalValue)
             .HasColumnType("NUMERIC(18,4)");
 
-        builder.Property(t => t.DateBuyorSell)
+        builder.Property(t => t.DateBuySell)
             .HasColumnName("DateBuyorSell")
             .HasColumnType("timestamp without time zone")
             .IsRequired();
 
         builder.Property(t => t.Custodian)
+            .HasConversion<string>()
             .IsRequired();
 
         builder.Property(t => t.CreatedAt)

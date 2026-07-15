@@ -7,7 +7,7 @@ namespace InvestmentPortfolio.Tests.Entities;
 [TestClass]
 public class AssetTests
 {
-    private static Asset CreateAsset() => new("PETR4", "Petrobras", EAssetType.Acao);
+    private static Asset CreateAsset() => new("PETR4", "Petrobras", EAssetType.Ações);
 
     [TestMethod]
     public void Dado_AssetCriado_Quando_Inspecionado_Entao_PropriedadesCorretas()
@@ -16,7 +16,7 @@ public class AssetTests
 
         Assert.AreEqual("PETR4", asset.Ticker);
         Assert.AreEqual("Petrobras", asset.Name);
-        Assert.AreEqual(EAssetType.Acao, asset.Type);
+        Assert.AreEqual(EAssetType.Ações, asset.Type);
         Assert.IsFalse(asset.IsDeleted);
     }
 
@@ -27,7 +27,7 @@ public class AssetTests
         var before = asset.UpdatedAt;
         Thread.Sleep(10);
 
-        asset.Update("VALE3", "Vale", EAssetType.Acao);
+        asset.Update("VALE3", "Vale", EAssetType.Ações);
 
         Assert.AreEqual("VALE3", asset.Ticker);
         Assert.AreEqual("Vale", asset.Name);
@@ -62,6 +62,42 @@ public class AssetTests
     }
 
     [TestMethod]
+    public void Dado_TickerMinusculo_Quando_AssetCriado_Entao_TickerEmMaiusculas()
+    {
+        var asset = new Asset("petr4", "Petrobras", EAssetType.Ações);
+
+        Assert.AreEqual("PETR4", asset.Ticker);
+    }
+
+    [TestMethod]
+    public void Dado_TickerMisto_Quando_AssetCriado_Entao_TickerEmMaiusculas()
+    {
+        var asset = new Asset("Petr4", "Petrobras", EAssetType.Ações);
+
+        Assert.AreEqual("PETR4", asset.Ticker);
+    }
+
+    [TestMethod]
+    public void Dado_TickerMinusculo_Quando_UpdateChamado_Entao_TickerEmMaiusculas()
+    {
+        var asset = CreateAsset();
+
+        asset.Update("vale3", "Vale", EAssetType.Ações);
+
+        Assert.AreEqual("VALE3", asset.Ticker);
+    }
+
+    [TestMethod]
+    public void Dado_TickerMisto_Quando_UpdateChamado_Entao_TickerEmMaiusculas()
+    {
+        var asset = CreateAsset();
+
+        asset.Update("Vale3", "Vale", EAssetType.Ações);
+
+        Assert.AreEqual("VALE3", asset.Ticker);
+    }
+
+    [TestMethod]
     public void Dado_AssetDeletado_Quando_IncluidoNaQuery_Entao_NaoRetornado()
     {
         var active = CreateAsset();
@@ -72,7 +108,7 @@ public class AssetTests
         var filter = AssetQueries.GetActive().Compile();
         var result = assets.Where(filter).ToList();
 
-        Assert.AreEqual(1, result.Count);
+        Assert.HasCount(1, result);
         Assert.AreEqual(active.Id, result[0].Id);
     }
 }

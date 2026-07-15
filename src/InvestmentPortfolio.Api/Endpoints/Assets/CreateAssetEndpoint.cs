@@ -9,7 +9,7 @@ public static class CreateAssetEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapPost("v1/assets", async (CreateAssetRequest request, IAssetHandler handler) =>
+        app.MapPost("v1/assets/CreateAsset", async (CreateAssetRequest request, IAssetHandler handler) =>
         {
             var result = await handler.CreateAsync(request);
             return result.IsSuccess

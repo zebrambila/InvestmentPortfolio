@@ -9,7 +9,7 @@ public static class CreateTransactionEndpoint
 {
     public static void Map(WebApplication app)
     {
-        app.MapPost("v1/transactions", async (CreateTransactionRequest request, ITransactionHandler handler) =>
+        app.MapPost("v1/transactions/CreateTransaction", async (CreateTransactionRequest request, ITransactionHandler handler) =>
         {
             var result = await handler.CreateAsync(request);
             return result.IsSuccess

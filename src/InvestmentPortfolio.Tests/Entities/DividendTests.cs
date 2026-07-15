@@ -1,4 +1,5 @@
 using InvestmentPortfolio.Core.Entities;
+using InvestmentPortfolio.Core.Enums;
 
 namespace InvestmentPortfolio.Tests.Entities;
 
@@ -6,18 +7,19 @@ namespace InvestmentPortfolio.Tests.Entities;
 public class DividendTests
 {
     private static Dividend CreateDividend() =>
-        new(Guid.NewGuid(), DateTime.UtcNow, 0.50m, 100m);
+        new(Guid.NewGuid(), DateTime.UtcNow, 40.00m, ECustodian.BTG);
 
     [TestMethod]
     public void Dado_DividendCriado_Quando_Inspecionado_Entao_PropriedadesCorretas()
     {
         var assetId = Guid.NewGuid();
         var date = DateTime.UtcNow;
-        var dividend = new Dividend(assetId, date, 0.50m, 100m);
+        var dividend = new Dividend(assetId, date, 40.00m, ECustodian.BTG);
 
         Assert.AreEqual(assetId, dividend.AssetId);
         Assert.AreEqual(date, dividend.ReceiptDate);
-        Assert.AreEqual(0.50m, dividend.UnitValue);
+        Assert.AreEqual(40.00m, dividend.TotalFinancial);
+        Assert.AreEqual(ECustodian.BTG, dividend.Custodian);
         Assert.IsFalse(dividend.IsDeleted);
     }
 
@@ -29,10 +31,11 @@ public class DividendTests
         var newDate = DateTime.UtcNow.AddDays(1);
         Thread.Sleep(10);
 
-        dividend.Update(newDate, 1.00m, 100m);
+        dividend.Update(newDate, 80.00m, ECustodian.Itau);
 
         Assert.AreEqual(newDate, dividend.ReceiptDate);
-        Assert.AreEqual(1.00m, dividend.UnitValue);
+        Assert.AreEqual(80.00m, dividend.TotalFinancial);
+        Assert.AreEqual(ECustodian.Itau, dividend.Custodian);
         Assert.IsTrue(dividend.UpdatedAt > before);
     }
 

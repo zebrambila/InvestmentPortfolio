@@ -1,5 +1,7 @@
+using System.Text.Json.Serialization;
 using InvestmentPortfolio.Api.BackgroundJobs;
 using InvestmentPortfolio.Api.Handlers;
+using InvestmentPortfolio.Api.Services;
 using InvestmentPortfolio.Core.Handlers;
 using InvestmentPortfolio.Core.Services;
 using InvestmentPortfolio.Infra.Data;
@@ -16,6 +18,7 @@ public static class BuilderExtension
         builder.Services.AddTransient<IAssetHandler, AssetHandler>();
         builder.Services.AddTransient<ITransactionHandler, TransactionHandler>();
         builder.Services.AddTransient<IDividendHandler, DividendHandler>();
+        builder.Services.AddTransient<IPatrimonyHandler, PatrimonyHandler>();
     }
 
     public static void AddDatabase(this WebApplicationBuilder builder)
@@ -41,7 +44,22 @@ public static class BuilderExtension
         });
 
         builder.Services.AddScoped<IMarketDataService, YahooFinanceMarketDataService>();
-        builder.Services.AddHostedService<PriceSyncJob>();
+        builder.Services.AddScoped<IAssetPriceHistoryService, AssetPriceHistoryService>();
+        builder.Services.AddHostedService<AssetPriceHistoryBackfillJob>();
+    }
+
+    public static void AddCors(this WebApplicationBuilder builder)
+    {
+        var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? ["http://localhost:5173"];
+
+        builder.Services.AddCors(opts =>
+        {
+            opts.AddPolicy("Frontend", policy =>
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
+        });
     }
 
     public static void AddSwagger(this WebApplicationBuilder builder)
@@ -49,6 +67,8 @@ public static class BuilderExtension
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(opts =>
         {
+            opts.UseInlineDefinitionsForEnums();
+
             opts.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "Investment Portfolio API",

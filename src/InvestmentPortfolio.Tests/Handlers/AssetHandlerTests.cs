@@ -13,7 +13,7 @@ public class AssetHandlerTests
     {
         using var ctx = InvestmentContextFake.Create();
         var handler = new AssetHandler(ctx, new MarketDataServiceFake());
-        var request = new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Acao };
+        var request = new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações };
 
         var response = await handler.CreateAsync(request);
 
@@ -26,7 +26,7 @@ public class AssetHandlerTests
     {
         using var ctx = InvestmentContextFake.Create();
         var handler = new AssetHandler(ctx, new MarketDataServiceFake());
-        var request = new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Acao };
+        var request = new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações };
         await handler.CreateAsync(request);
 
         var response = await handler.CreateAsync(request);
@@ -39,14 +39,14 @@ public class AssetHandlerTests
     {
         using var ctx = InvestmentContextFake.Create();
         var handler = new AssetHandler(ctx, new MarketDataServiceFake());
-        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Acao });
+        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
 
         var response = await handler.UpdateAsync(new UpdateAssetRequest
         {
             Id = created.Data!.Id,
             Ticker = "PETR3",
             Name = "Petrobras PN",
-            Type = EAssetType.Acao
+            Type = EAssetType.Ações
         });
 
         Assert.AreEqual(200, response.Code);
@@ -64,7 +64,7 @@ public class AssetHandlerTests
             Id = Guid.NewGuid(),
             Ticker = "PETR4",
             Name = "Petrobras",
-            Type = EAssetType.Acao
+            Type = EAssetType.Ações
         });
 
         Assert.AreEqual(404, response.Code);
@@ -75,7 +75,7 @@ public class AssetHandlerTests
     {
         using var ctx = InvestmentContextFake.Create();
         var handler = new AssetHandler(ctx, new MarketDataServiceFake());
-        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Acao });
+        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
 
         var response = await handler.UpdatePriceAsync(new UpdateAssetPriceRequest { Id = created.Data!.Id, CurrentPrice = 38.50m });
 
@@ -88,7 +88,7 @@ public class AssetHandlerTests
     {
         using var ctx = InvestmentContextFake.Create();
         var handler = new AssetHandler(ctx, new MarketDataServiceFake());
-        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Acao });
+        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
 
         var response = await handler.DeleteAsync(new DeleteAssetRequest { Id = created.Data!.Id });
 
@@ -113,7 +113,7 @@ public class AssetHandlerTests
     {
         using var ctx = InvestmentContextFake.Create();
         var handler = new AssetHandler(ctx, new MarketDataServiceFake());
-        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Acao });
+        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
 
         var response = await handler.GetByIdAsync(new GetAssetByIdRequest { Id = created.Data!.Id });
 
@@ -126,7 +126,7 @@ public class AssetHandlerTests
     {
         using var ctx = InvestmentContextFake.Create();
         var handler = new AssetHandler(ctx, new MarketDataServiceFake());
-        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Acao });
+        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
         await handler.DeleteAsync(new DeleteAssetRequest { Id = created.Data!.Id });
 
         var response = await handler.GetByIdAsync(new GetAssetByIdRequest { Id = created.Data!.Id });
@@ -139,15 +139,15 @@ public class AssetHandlerTests
     {
         using var ctx = InvestmentContextFake.Create();
         var handler = new AssetHandler(ctx, new MarketDataServiceFake());
-        await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Acao });
-        await handler.CreateAsync(new CreateAssetRequest { Ticker = "MXRF11", Name = "Maxi Renda", Type = EAssetType.FundoImobiliario });
-        var created3 = await handler.CreateAsync(new CreateAssetRequest { Ticker = "VALE3", Name = "Vale", Type = EAssetType.Acao });
+        await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
+        await handler.CreateAsync(new CreateAssetRequest { Ticker = "MXRF11", Name = "Maxi Renda", Type = EAssetType.FIIs });
+        var created3 = await handler.CreateAsync(new CreateAssetRequest { Ticker = "VALE3", Name = "Vale", Type = EAssetType.Ações });
         await handler.DeleteAsync(new DeleteAssetRequest { Id = created3.Data!.Id });
 
         var response = await handler.GetAllAsync(new GetAllAssetsRequest { PageNumber = 1, PageSize = 25 });
 
         Assert.AreEqual(200, response.Code);
-        Assert.AreEqual(2, response.Data!.Count);
+        Assert.HasCount(2, response.Data!);
         Assert.AreEqual(2, response.TotalCount);
     }
 }

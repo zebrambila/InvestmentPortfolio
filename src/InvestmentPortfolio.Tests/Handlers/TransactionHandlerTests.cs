@@ -12,7 +12,7 @@ public class TransactionHandlerTests
 {
     private static async Task<Guid> SeedAssetAsync(InvestmentContext ctx)
     {
-        var asset = new Asset("PETR4", "Petrobras", EAssetType.Acao);
+        var asset = new Asset("PETR4", "Petrobras", EAssetType.Ações);
         ctx.Assets.Add(asset);
         await ctx.SaveChangesAsync();
         return asset.Id;
@@ -31,7 +31,7 @@ public class TransactionHandlerTests
             Type = EOperationType.Compra,
             Quantity = 100m,
             UnitPrice = 35m,
-            DateBuyorSell = DateTime.UtcNow,
+            DateBuySell = DateTime.UtcNow,
             Custodian = ECustodian.BTG
         });
 
@@ -51,7 +51,7 @@ public class TransactionHandlerTests
             Type = EOperationType.Compra,
             Quantity = 100m,
             UnitPrice = 35m,
-            DateBuyorSell = DateTime.UtcNow,
+            DateBuySell = DateTime.UtcNow,
             Custodian = ECustodian.BTG
         });
 
@@ -67,7 +67,7 @@ public class TransactionHandlerTests
         var created = await handler.CreateAsync(new CreateTransactionRequest
         {
             AssetId = assetId, Type = EOperationType.Compra, Quantity = 100m, UnitPrice = 35m,
-            DateBuyorSell = DateTime.UtcNow, Custodian = ECustodian.BTG
+            DateBuySell = DateTime.UtcNow, Custodian = ECustodian.BTG
         });
 
         var response = await handler.UpdateAsync(new UpdateTransactionRequest
@@ -76,7 +76,7 @@ public class TransactionHandlerTests
             Type = EOperationType.Compra,
             Quantity = 50m,
             UnitPrice = 40m,
-            DateBuyorSell = DateTime.UtcNow,
+            DateBuySell = DateTime.UtcNow,
             Custodian = ECustodian.Itau
         });
 
@@ -93,7 +93,7 @@ public class TransactionHandlerTests
         var response = await handler.UpdateAsync(new UpdateTransactionRequest
         {
             Id = Guid.NewGuid(), Type = EOperationType.Compra, Quantity = 10m, UnitPrice = 10m,
-            DateBuyorSell = DateTime.UtcNow, Custodian = ECustodian.BTG
+            DateBuySell = DateTime.UtcNow, Custodian = ECustodian.BTG
         });
 
         Assert.AreEqual(404, response.Code);
@@ -108,7 +108,7 @@ public class TransactionHandlerTests
         var created = await handler.CreateAsync(new CreateTransactionRequest
         {
             AssetId = assetId, Type = EOperationType.Compra, Quantity = 100m, UnitPrice = 35m,
-            DateBuyorSell = DateTime.UtcNow, Custodian = ECustodian.BTG
+            DateBuySell = DateTime.UtcNow, Custodian = ECustodian.BTG
         });
 
         var response = await handler.DeleteAsync(new DeleteTransactionRequest { Id = created.Data!.Id });
@@ -127,7 +127,7 @@ public class TransactionHandlerTests
         var created = await handler.CreateAsync(new CreateTransactionRequest
         {
             AssetId = assetId, Type = EOperationType.Compra, Quantity = 100m, UnitPrice = 35m,
-            DateBuyorSell = DateTime.UtcNow, Custodian = ECustodian.BTG
+            DateBuySell = DateTime.UtcNow, Custodian = ECustodian.BTG
         });
 
         var response = await handler.GetByIdAsync(new GetTransactionByIdRequest { Id = created.Data!.Id });
@@ -145,12 +145,12 @@ public class TransactionHandlerTests
         await handler.CreateAsync(new CreateTransactionRequest
         {
             AssetId = assetId, Type = EOperationType.Compra, Quantity = 100m, UnitPrice = 35m,
-            DateBuyorSell = DateTime.UtcNow, Custodian = ECustodian.BTG
+            DateBuySell = DateTime.UtcNow, Custodian = ECustodian.BTG
         });
         var t2 = await handler.CreateAsync(new CreateTransactionRequest
         {
             AssetId = assetId, Type = EOperationType.Venda, Quantity = 20m, UnitPrice = 40m,
-            DateBuyorSell = DateTime.UtcNow, Custodian = ECustodian.Itau
+            DateBuySell = DateTime.UtcNow, Custodian = ECustodian.Itau
         });
         await handler.DeleteAsync(new DeleteTransactionRequest { Id = t2.Data!.Id });
 

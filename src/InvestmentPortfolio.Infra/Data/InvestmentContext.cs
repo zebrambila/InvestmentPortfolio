@@ -8,6 +8,7 @@ public class InvestmentContext(DbContextOptions<InvestmentContext> options) : Db
     public DbSet<Asset> Assets { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
     public DbSet<Dividend> Dividends { get; set; } = null!;
+    public DbSet<AssetPriceHistory> AssetPriceHistories { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

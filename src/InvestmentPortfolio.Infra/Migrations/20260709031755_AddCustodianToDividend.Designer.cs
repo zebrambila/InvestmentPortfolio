@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InvestmentPortfolio.Infra.Migrations
 {
     [DbContext(typeof(InvestmentContext))]
-    [Migration("20260629010646_DividendReceiptDateWithoutTimeZone")]
-    partial class DividendReceiptDateWithoutTimeZone
+    [Migration("20260709031755_AddCustodianToDividend")]
+    partial class AddCustodianToDividend
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,8 +53,9 @@ namespace InvestmentPortfolio.Infra.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -79,22 +80,20 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("Custodian")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<decimal>("PositionQuantity")
-                        .HasColumnType("NUMERIC(18,4)");
-
                     b.Property<DateTime>("ReceiptDate")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("TotalFinancial")
-                        .HasColumnType("NUMERIC(18,4)");
-
-                    b.Property<decimal>("UnitValue")
                         .HasColumnType("NUMERIC(18,4)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -119,10 +118,11 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Custodian")
-                        .HasColumnType("integer");
+                    b.Property<string>("Custodian")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<DateTime>("DateBuyorSell")
+                    b.Property<DateTime>("DateBuySell")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("DateBuyorSell");
 
@@ -135,11 +135,12 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("NUMERIC(18,4)");
 
+                    b.Property<string>("Side")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<decimal>("TotalValue")
                         .HasColumnType("NUMERIC(18,4)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("NUMERIC(18,4)");
