@@ -11,7 +11,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InvestmentPortfolio.Api.Handlers;
 
-public class AssetHandler(InvestmentContext context, IMarketDataService marketDataService) : IAssetHandler
+public class AssetHandler(
+    InvestmentContext context,
+    IMarketDataService marketDataService,
+    IAssetPriceHistoryService priceHistoryService) : IAssetHandler
 {
     private const int MaxBulkAssets = 500;
 
@@ -274,6 +277,19 @@ public class AssetHandler(InvestmentContext context, IMarketDataService marketDa
         catch
         {
             return new Response<int>(0, 500, "Erro ao sincronizar preços");
+        }
+    }
+
+    public async Task<Response<BackfillPricesResponse?>> BackfillPricesAsync(BackfillPricesRequest request, CancellationToken ct = default)
+    {
+        try
+        {
+            var result = await priceHistoryService.BackfillAsync(request.Months, ct);
+            return new Response<BackfillPricesResponse?>(result, 200, $"{result.Processed.Count} ativo(s) processado(s), {result.Failed.Count} falha(s)");
+        }
+        catch
+        {
+            return new Response<BackfillPricesResponse?>(null, 500, "Erro no backfill de histórico de preços");
         }
     }
 }

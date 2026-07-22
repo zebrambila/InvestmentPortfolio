@@ -13,7 +13,7 @@ public class AssetGetAllTests
     private static AssetHandler AssetHandler(InvestmentPortfolio.Infra.Data.InvestmentContext ctx, decimal currentPrice = 0m)
     {
         var prices = new Dictionary<string, decimal?> { ["PETR4"] = currentPrice, ["MXRF11"] = currentPrice };
-        return new AssetHandler(ctx, new MarketDataServiceFake(prices));
+        return new AssetHandler(ctx, new MarketDataServiceFake(prices), new AssetPriceHistoryServiceFake());
     }
 
     private static async Task<Guid> SeedAssetAsync(

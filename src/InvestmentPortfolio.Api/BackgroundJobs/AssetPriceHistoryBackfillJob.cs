@@ -13,8 +13,10 @@ public class AssetPriceHistoryBackfillJob(IServiceScopeFactory scopeFactory, ILo
         {
             using var scope = scopeFactory.CreateScope();
             var service = scope.ServiceProvider.GetRequiredService<IAssetPriceHistoryService>();
-            await service.BackfillAsync(stoppingToken);
-            logger.LogInformation("Backfill de histórico de preços concluído.");
+            var result = await service.BackfillAsync(ct: stoppingToken);
+            logger.LogInformation(
+                "Backfill de histórico de preços concluído. {Processed} processado(s), {Failed} falha(s).",
+                result.Processed.Count, result.Failed.Count);
         }
         catch (Exception ex)
         {

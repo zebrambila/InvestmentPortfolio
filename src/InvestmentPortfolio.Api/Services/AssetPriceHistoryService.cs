@@ -1,4 +1,5 @@
 using InvestmentPortfolio.Core.Entities;
+using InvestmentPortfolio.Core.Responses;
 using InvestmentPortfolio.Core.Services;
 using InvestmentPortfolio.Infra.Data;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +11,15 @@ public class AssetPriceHistoryService(
     IMarketDataService marketDataService,
     ILogger<AssetPriceHistoryService> logger) : IAssetPriceHistoryService
 {
-    public async Task BackfillAsync(CancellationToken ct = default)
+    private const int DefaultBackfillMonths = 12;
+
+    public async Task<BackfillPricesResponse> BackfillAsync(int? months = null, CancellationToken ct = default)
     {
+        var response = new BackfillPricesResponse();
+
         var assets = await context.Assets.Where(a => !a.IsDeleted).ToListAsync(ct);
         if (assets.Count == 0)
-            return;
+            return response;
 
         var firstTransactionDates = await context.Transactions
             .Where(t => !t.IsDeleted)
@@ -22,7 +27,7 @@ public class AssetPriceHistoryService(
             .Select(g => new { AssetId = g.Key, FirstDate = g.Min(t => t.DateBuySell) })
             .ToDictionaryAsync(x => x.AssetId, x => x.FirstDate, ct);
 
-        var monthEnds = GetLastTwelveCompletedMonthEnds(DateTime.Now.Date);
+        var monthEnds = GetLastCompletedMonthEnds(DateTime.Now.Date, months is > 0 ? months.Value : DefaultBackfillMonths);
 
         foreach (var asset in assets)
         {
@@ -41,24 +46,49 @@ public class AssetPriceHistoryService(
                     .ToListAsync(ct);
 
                 var missingDates = targetDates.Except(existingDates).ToList();
-                if (missingDates.Count == 0)
-                    continue;
 
-                var prices = await marketDataService.GetHistoricalClosePricesAsync(asset.Ticker, missingDates, ct);
-
-                foreach (var date in missingDates)
+                if (missingDates.Count > 0)
                 {
-                    if (prices.TryGetValue(date, out var price) && price.HasValue)
-                        context.AssetPriceHistories.Add(new AssetPriceHistory(asset.Id, date, price.Value));
+                    var prices = await marketDataService.GetHistoricalClosePricesAsync(asset.Ticker, missingDates, ct);
+
+                    foreach (var date in missingDates)
+                    {
+                        if (prices.TryGetValue(date, out var price) && price.HasValue)
+                            context.AssetPriceHistories.Add(new AssetPriceHistory(asset.Id, date, price.Value));
+                    }
+
+                    await context.SaveChangesAsync(ct);
                 }
 
-                await context.SaveChangesAsync(ct);
+                var filledCount = await context.AssetPriceHistories
+                    .CountAsync(h => h.AssetId == asset.Id && targetDates.Contains(h.Date), ct);
+
+                if (filledCount == 0)
+                {
+                    response.Failed.Add(new BackfillPricesError
+                    {
+                        AssetId = asset.Id,
+                        Ticker = asset.Ticker,
+                        Error = "Histórico indisponível no Yahoo Finance para o período."
+                    });
+                    continue;
+                }
+
+                response.Processed.Add(new BackfillPricesResult
+                {
+                    AssetId = asset.Id,
+                    Ticker = asset.Ticker,
+                    MonthsFilled = filledCount
+                });
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Erro no backfill de histórico de preços para o ativo {Ticker}.", asset.Ticker);
+                response.Failed.Add(new BackfillPricesError { AssetId = asset.Id, Ticker = asset.Ticker, Error = ex.Message });
             }
         }
+
+        return response;
     }
 
     public async Task SyncCurrentMonthAsync(CancellationToken ct = default)
@@ -97,12 +127,12 @@ public class AssetPriceHistoryService(
         }
     }
 
-    private static List<DateTime> GetLastTwelveCompletedMonthEnds(DateTime reference)
+    private static List<DateTime> GetLastCompletedMonthEnds(DateTime reference, int months)
     {
         var result = new List<DateTime>();
         var cursor = new DateTime(reference.Year, reference.Month, 1).AddMonths(-1);
 
-        for (var i = 0; i < 12; i++)
+        for (var i = 0; i < months; i++)
         {
             result.Add(cursor.AddMonths(1).AddDays(-1));
             cursor = cursor.AddMonths(-1);

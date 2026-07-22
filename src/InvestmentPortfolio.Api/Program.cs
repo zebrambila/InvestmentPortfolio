@@ -37,6 +37,7 @@ BulkCreateAssetsEndpoint.Map(app);
 UpdateAssetEndpoint.Map(app);
 UpdateAssetPriceEndpoint.Map(app);
 SyncAssetPricesEndpoint.Map(app);
+BackfillPricesEndpoint.Map(app);
 DeleteAssetEndpoint.Map(app);
 GetAssetByIdEndpoint.Map(app);
 GetAllAssetsEndpoint.Map(app);

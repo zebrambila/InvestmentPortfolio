@@ -71,6 +71,47 @@ public class AssetPriceHistoryServiceTests
     }
 
     [TestMethod]
+    public async Task Dado_MesesCustomizado_Quando_BackfillAsync_Entao_RespeitaQuantidadeDeMeses()
+    {
+        using var ctx = InvestmentContextFake.Create();
+        var assetId = await SeedAssetAsync(ctx);
+        ctx.Transactions.Add(new Transaction(assetId, EOperationType.Compra, 10m, 100m, DateTime.Now.AddYears(-5), ECustodian.BTG));
+        await ctx.SaveChangesAsync();
+
+        var market = new MarketDataServiceFake(historicalPrices: new()
+        {
+            ["PETR4"] = BuildDailyPrices(50m)
+        });
+        var service = new AssetPriceHistoryService(ctx, market, NullLogger<AssetPriceHistoryService>.Instance);
+
+        var result = await service.BackfillAsync(months: 6);
+
+        var count = await ctx.AssetPriceHistories.CountAsync(h => h.AssetId == assetId);
+        Assert.AreEqual(6, count);
+        Assert.HasCount(1, result.Processed);
+        Assert.AreEqual(6, result.Processed[0].MonthsFilled);
+        Assert.IsEmpty(result.Failed);
+    }
+
+    [TestMethod]
+    public async Task Dado_TickerSemCotacaoNaApiExterna_Quando_BackfillAsync_Entao_RetornaComoFalha()
+    {
+        using var ctx = InvestmentContextFake.Create();
+        var assetId = await SeedAssetAsync(ctx, "HGLG11");
+        ctx.Transactions.Add(new Transaction(assetId, EOperationType.Compra, 10m, 100m, DateTime.Now.AddYears(-5), ECustodian.BTG));
+        await ctx.SaveChangesAsync();
+
+        var market = new MarketDataServiceFake();
+        var service = new AssetPriceHistoryService(ctx, market, NullLogger<AssetPriceHistoryService>.Instance);
+
+        var result = await service.BackfillAsync();
+
+        Assert.IsEmpty(result.Processed);
+        Assert.HasCount(1, result.Failed);
+        Assert.AreEqual("HGLG11", result.Failed[0].Ticker);
+    }
+
+    [TestMethod]
     public async Task Dado_HistoricoJaExistenteNoMes_Quando_SyncCurrentMonthAsync_Entao_AtualizaPrecoSemDuplicar()
     {
         using var ctx = InvestmentContextFake.Create();

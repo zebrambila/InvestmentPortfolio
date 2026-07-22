@@ -12,7 +12,7 @@ public class AssetHandlerTests
     public async Task Dado_RequestValido_Quando_CreateAsyncChamado_Entao_RetornaCode201()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
         var request = new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações };
 
         var response = await handler.CreateAsync(request);
@@ -25,7 +25,7 @@ public class AssetHandlerTests
     public async Task Dado_TickerDuplicado_Quando_CreateAsyncChamado_Entao_RetornaCode400()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
         var request = new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações };
         await handler.CreateAsync(request);
 
@@ -38,7 +38,7 @@ public class AssetHandlerTests
     public async Task Dado_AssetExistente_Quando_UpdateAsyncChamado_Entao_DadosAlterados()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
         var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
 
         var response = await handler.UpdateAsync(new UpdateAssetRequest
@@ -57,7 +57,7 @@ public class AssetHandlerTests
     public async Task Dado_AssetInexistente_Quando_UpdateAsyncChamado_Entao_RetornaCode404()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
 
         var response = await handler.UpdateAsync(new UpdateAssetRequest
         {
@@ -74,7 +74,7 @@ public class AssetHandlerTests
     public async Task Dado_AssetExistente_Quando_UpdatePriceAsyncChamado_Entao_PrecoAtualizado()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
         var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
 
         var response = await handler.UpdatePriceAsync(new UpdateAssetPriceRequest { Id = created.Data!.Id, CurrentPrice = 38.50m });
@@ -87,7 +87,7 @@ public class AssetHandlerTests
     public async Task Dado_AssetExistente_Quando_DeleteAsyncChamado_Entao_ExclusaoLogicaAplicada()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
         var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
 
         var response = await handler.DeleteAsync(new DeleteAssetRequest { Id = created.Data!.Id });
@@ -101,7 +101,7 @@ public class AssetHandlerTests
     public async Task Dado_AssetInexistente_Quando_DeleteAsyncChamado_Entao_RetornaCode404()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
 
         var response = await handler.DeleteAsync(new DeleteAssetRequest { Id = Guid.NewGuid() });
 
@@ -112,7 +112,7 @@ public class AssetHandlerTests
     public async Task Dado_AssetExistente_Quando_GetByIdAsyncChamado_Entao_RetornaAsset()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
         var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
 
         var response = await handler.GetByIdAsync(new GetAssetByIdRequest { Id = created.Data!.Id });
@@ -125,7 +125,7 @@ public class AssetHandlerTests
     public async Task Dado_AssetDeletado_Quando_GetByIdAsyncChamado_Entao_RetornaCode404()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
         var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
         await handler.DeleteAsync(new DeleteAssetRequest { Id = created.Data!.Id });
 
@@ -138,7 +138,7 @@ public class AssetHandlerTests
     public async Task Dado_AssetsAtivos_Quando_GetAllAsyncChamado_Entao_RetornaListaPaginada()
     {
         using var ctx = InvestmentContextFake.Create();
-        var handler = new AssetHandler(ctx, new MarketDataServiceFake());
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(), new AssetPriceHistoryServiceFake());
         await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
         await handler.CreateAsync(new CreateAssetRequest { Ticker = "MXRF11", Name = "Maxi Renda", Type = EAssetType.FIIs });
         var created3 = await handler.CreateAsync(new CreateAssetRequest { Ticker = "VALE3", Name = "Vale", Type = EAssetType.Ações });
