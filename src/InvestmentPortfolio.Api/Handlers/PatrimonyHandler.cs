@@ -35,10 +35,15 @@ public class PatrimonyHandler(InvestmentContext context) : IPatrimonyHandler
                 .GroupBy(h => h.AssetId)
                 .ToDictionary(g => g.Key, g => g.OrderBy(h => h.Date).ToList());
 
+            var currentPriceByAsset = await context.Assets
+                .Select(a => new { a.Id, a.CurrentPrice })
+                .ToDictionaryAsync(a => a.Id, a => a.CurrentPrice);
+
             var monthResponses = new List<PatrimonyMonthResponse>();
 
             foreach (var (year, month) in months)
             {
+                var isCurrentMonth = year == today.Year && month == today.Month;
                 var monthEnd = new DateTime(year, month, DateTime.DaysInMonth(year, month));
 
                 var byAsset = transactions
@@ -61,6 +66,15 @@ public class PatrimonyHandler(InvestmentContext context) : IPatrimonyHandler
                 {
                     if (a.PositionQty == 0)
                         continue;
+
+                    if (isCurrentMonth)
+                    {
+                        if (!currentPriceByAsset.TryGetValue(a.AssetId, out var currentPrice))
+                            continue;
+
+                        marketValue += a.PositionQty * currentPrice;
+                        continue;
+                    }
 
                     if (!priceHistoryByAsset.TryGetValue(a.AssetId, out var series))
                         continue;

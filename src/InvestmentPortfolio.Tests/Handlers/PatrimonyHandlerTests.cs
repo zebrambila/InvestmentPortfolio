@@ -111,4 +111,30 @@ public class PatrimonyHandlerTests
         Assert.AreEqual(1000m, response.Data!.Months[0].Invested);
         Assert.AreEqual(0m, response.Data.Months[0].MarketValue);
     }
+
+    [TestMethod]
+    public async Task Dado_MesVigente_Quando_GetEvolutionByMonth_Entao_UsaCurrentPriceDoAsset()
+    {
+        using var ctx = InvestmentContextFake.Create();
+        var assetId = await SeedAssetAsync(ctx);
+        var asset = await ctx.Assets.FindAsync(assetId);
+        asset!.UpdateCurrentPrice(50m);
+
+        var today = DateTime.Now.Date;
+        ctx.Transactions.Add(new Transaction(assetId, EOperationType.Compra, 10m, 40m, today, ECustodian.BTG));
+        ctx.AssetPriceHistories.Add(new AssetPriceHistory(assetId, new DateTime(today.Year, today.Month, 1), 30m));
+        await ctx.SaveChangesAsync();
+
+        var handler = new PatrimonyHandler(ctx);
+        var response = await handler.GetEvolutionByMonthAsync(new GetPatrimonyEvolutionRequest
+        {
+            DateFrom = today,
+            DateTo = today
+        });
+
+        Assert.AreEqual(200, response.Code);
+        var currentMonth = response.Data!.Months[0];
+        Assert.AreEqual(400m, currentMonth.Invested);
+        Assert.AreEqual(500m, currentMonth.MarketValue);
+    }
 }

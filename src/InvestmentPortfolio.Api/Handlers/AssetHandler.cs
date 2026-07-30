@@ -17,6 +17,7 @@ public class AssetHandler(
     IAssetPriceHistoryService priceHistoryService) : IAssetHandler
 {
     private const int MaxBulkAssets = 500;
+    private const int DefaultDividendMonths = 12;
 
     public async Task<Response<Asset?>> CreateAsync(CreateAssetRequest request)
     {
@@ -291,5 +292,88 @@ public class AssetHandler(
         {
             return new Response<BackfillPricesResponse?>(null, 500, "Erro no backfill de histórico de preços");
         }
+    }
+
+    public async Task<Response<List<DividendEvent>?>> GetDividendEventsAsync(GetAssetDividendEventsRequest request, CancellationToken ct = default)
+    {
+        try
+        {
+            var asset = await context.Assets
+                .FirstOrDefaultAsync(a => !a.IsDeleted && a.Ticker == request.Ticker.ToUpper(), ct);
+
+            if (asset is null)
+                return new Response<List<DividendEvent>?>(null, 404, "Ativo não encontrado");
+
+            if (request.From.HasValue && request.To.HasValue && request.From.Value.Date > request.To.Value.Date)
+                return new Response<List<DividendEvent>?>(null, 400, "A data inicial não pode ser posterior à data final");
+
+            DateTime periodFrom, periodTo;
+            if (request.From.HasValue && request.To.HasValue)
+            {
+                periodFrom = request.From.Value.Date;
+                periodTo = request.To.Value.Date;
+            }
+            else
+            {
+                var months = request.Months is > 0 ? request.Months.Value : DefaultDividendMonths;
+                periodTo = DateTime.Now.Date;
+                periodFrom = periodTo.AddMonths(-months);
+            }
+
+            var events = await marketDataService.GetDividendEventsAsync(asset.Ticker, periodFrom, periodTo, ct);
+
+            if (events.Count > 0)
+                await PersistDividendEventsAsync(asset.Id, events, ct);
+
+            return new Response<List<DividendEvent>?>(events, 200);
+        }
+        catch
+        {
+            return new Response<List<DividendEvent>?>(null, 500, "Erro ao buscar eventos de dividendos");
+        }
+    }
+
+    private async Task PersistDividendEventsAsync(Guid assetId, List<DividendEvent> events, CancellationToken ct)
+    {
+        var transactions = await context.Transactions
+            .Where(t => !t.IsDeleted && t.AssetId == assetId)
+            .Select(t => new { t.Side, t.Quantity, t.DateBuySell })
+            .ToListAsync(ct);
+
+        if (transactions.Count == 0)
+            return;
+
+        var earliestDate = events.Min(e => e.Date);
+        var latestDate = events.Max(e => e.Date);
+
+        var existingDates = await context.Dividends
+            .Where(d => !d.IsDeleted && d.AssetId == assetId && d.Custodian == ECustodian.Itau
+                        && d.ReceiptDate >= earliestDate && d.ReceiptDate <= latestDate)
+            .Select(d => d.ReceiptDate.Date)
+            .ToListAsync(ct);
+        var existingKeys = existingDates.ToHashSet();
+
+        var newDividends = new List<Dividend>();
+
+        foreach (var evt in events)
+        {
+            if (evt.Amount <= 0 || !existingKeys.Add(evt.Date))
+                continue;
+
+            var quantity = transactions
+                .Where(t => t.DateBuySell.Date <= evt.Date)
+                .Sum(t => t.Side == EOperationType.Compra ? t.Quantity : -t.Quantity);
+
+            if (quantity <= 0)
+                continue;
+
+            newDividends.Add(new Dividend(assetId, evt.Date, evt.Amount * quantity, ECustodian.Itau));
+        }
+
+        if (newDividends.Count == 0)
+            return;
+
+        context.Dividends.AddRange(newDividends);
+        await context.SaveChangesAsync(ct);
     }
 }

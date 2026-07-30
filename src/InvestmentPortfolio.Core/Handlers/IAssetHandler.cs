@@ -1,6 +1,7 @@
 using InvestmentPortfolio.Core.Entities;
 using InvestmentPortfolio.Core.Requests.Assets;
 using InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Services;
 
 namespace InvestmentPortfolio.Core.Handlers;
 
@@ -15,4 +16,5 @@ public interface IAssetHandler
     Task<AssetPagedResponse> GetAllAsync(GetAllAssetsRequest request);
     Task<Response<int>> SyncPricesAsync(CancellationToken ct = default);
     Task<Response<BackfillPricesResponse?>> BackfillPricesAsync(BackfillPricesRequest request, CancellationToken ct = default);
+    Task<Response<List<DividendEvent>?>> GetDividendEventsAsync(GetAssetDividendEventsRequest request, CancellationToken ct = default);
 }

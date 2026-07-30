@@ -1,6 +1,8 @@
 using InvestmentPortfolio.Api.Handlers;
+using InvestmentPortfolio.Core.Entities;
 using InvestmentPortfolio.Core.Enums;
 using InvestmentPortfolio.Core.Requests.Assets;
+using InvestmentPortfolio.Core.Services;
 using InvestmentPortfolio.Tests.Fakes;
 
 namespace InvestmentPortfolio.Tests.Handlers;
@@ -149,5 +151,55 @@ public class AssetHandlerTests
         Assert.AreEqual(200, response.Code);
         Assert.HasCount(2, response.Data!);
         Assert.AreEqual(2, response.TotalCount);
+    }
+
+    [TestMethod]
+    public async Task Dado_PosicaoEmDoisCustodiantes_Quando_GetDividendEventsAsyncChamado_Entao_CriaDividendoUnicoNaItauComPosicaoTotal()
+    {
+        using var ctx = InvestmentContextFake.Create();
+        var eventDate = new DateTime(2026, 6, 10);
+        var dividendEvents = new Dictionary<string, List<DividendEvent>>
+        {
+            ["PETR4"] = [new DividendEvent(eventDate, 2.00m)]
+        };
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(dividendEvents: dividendEvents), new AssetPriceHistoryServiceFake());
+        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
+        var assetId = created.Data!.Id;
+
+        ctx.Transactions.Add(new Transaction(assetId, EOperationType.Compra, 100m, 30m, eventDate.AddMonths(-1), ECustodian.BTG));
+        ctx.Transactions.Add(new Transaction(assetId, EOperationType.Compra, 50m, 30m, eventDate.AddMonths(-1), ECustodian.Itau));
+        await ctx.SaveChangesAsync();
+
+        var response = await handler.GetDividendEventsAsync(new GetAssetDividendEventsRequest { Ticker = "PETR4", From = eventDate, To = eventDate });
+
+        Assert.AreEqual(200, response.Code);
+        var dividends = ctx.Dividends.Where(d => d.AssetId == assetId).ToList();
+        Assert.HasCount(1, dividends);
+        Assert.AreEqual(ECustodian.Itau, dividends.Single().Custodian);
+        Assert.AreEqual(300.00m, dividends.Single().TotalFinancial);
+    }
+
+    [TestMethod]
+    public async Task Dado_DividendoJaInserido_Quando_GetDividendEventsAsyncChamadoNovamente_Entao_NaoDuplica()
+    {
+        using var ctx = InvestmentContextFake.Create();
+        var eventDate = new DateTime(2026, 6, 10);
+        var dividendEvents = new Dictionary<string, List<DividendEvent>>
+        {
+            ["PETR4"] = [new DividendEvent(eventDate, 2.00m)]
+        };
+        var handler = new AssetHandler(ctx, new MarketDataServiceFake(dividendEvents: dividendEvents), new AssetPriceHistoryServiceFake());
+        var created = await handler.CreateAsync(new CreateAssetRequest { Ticker = "PETR4", Name = "Petrobras", Type = EAssetType.Ações });
+        var assetId = created.Data!.Id;
+
+        ctx.Transactions.Add(new Transaction(assetId, EOperationType.Compra, 100m, 30m, eventDate.AddMonths(-1), ECustodian.BTG));
+        await ctx.SaveChangesAsync();
+
+        var request = new GetAssetDividendEventsRequest { Ticker = "PETR4", From = eventDate, To = eventDate };
+        await handler.GetDividendEventsAsync(request);
+        await handler.GetDividendEventsAsync(request);
+
+        var dividends = ctx.Dividends.Where(d => d.AssetId == assetId).ToList();
+        Assert.HasCount(1, dividends);
     }
 }

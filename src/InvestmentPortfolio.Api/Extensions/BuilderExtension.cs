@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using InvestmentPortfolio.Api.BackgroundJobs;
 using InvestmentPortfolio.Api.Handlers;
 using InvestmentPortfolio.Api.Services;
 using InvestmentPortfolio.Core.Handlers;
@@ -45,7 +44,6 @@ public static class BuilderExtension
 
         builder.Services.AddScoped<IMarketDataService, YahooFinanceMarketDataService>();
         builder.Services.AddScoped<IAssetPriceHistoryService, AssetPriceHistoryService>();
-        builder.Services.AddHostedService<AssetPriceHistoryBackfillJob>();
     }
 
     public static void AddCors(this WebApplicationBuilder builder)

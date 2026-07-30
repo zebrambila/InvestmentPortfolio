@@ -65,6 +65,14 @@ public class YahooFinanceMarketDataService(IHttpClientFactory httpClientFactory,
         return result;
     }
 
+    public async Task<List<DividendEvent>> GetDividendEventsAsync(string ticker, DateTime periodFrom, DateTime periodTo, CancellationToken ct = default)
+    {
+        var client = httpClientFactory.CreateClient("MarketData");
+
+        return await ThrottledFetchAsync(GetIntervalMs(), ct,
+            () => FetchDividendEventsAsync(client, ticker.ToUpper(), periodFrom, periodTo, ct));
+    }
+
     private int GetIntervalMs() => configuration.GetValue("MarketData:RequestIntervalMs", 300);
 
     private static Task<AssetInfo?> FetchWithThrottleAsync(HttpClient client, string ticker, int intervalMs, CancellationToken ct)
@@ -144,6 +152,40 @@ public class YahooFinanceMarketDataService(IHttpClientFactory httpClientFactory,
             }
 
             return [.. series.OrderBy(p => p.Date)];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static async Task<List<DividendEvent>> FetchDividendEventsAsync(HttpClient client, string ticker, DateTime periodFrom, DateTime periodTo, CancellationToken ct)
+    {
+        try
+        {
+            var period1 = new DateTimeOffset(periodFrom, TimeSpan.Zero).ToUnixTimeSeconds();
+            var period2 = new DateTimeOffset(periodTo, TimeSpan.Zero).ToUnixTimeSeconds();
+
+            var response = await client.GetAsync($"v8/finance/chart/{ticker}.SA?interval=1d&period1={period1}&period2={period2}&events=div", ct);
+            if (!response.IsSuccessStatusCode)
+                return [];
+
+            var json = await response.Content.ReadAsStringAsync(ct);
+            var doc = JsonSerializer.Deserialize<JsonElement>(json, JsonOptions);
+
+            var chartResult = doc.GetProperty("chart").GetProperty("result")[0];
+            if (!chartResult.TryGetProperty("events", out var events) || !events.TryGetProperty("dividends", out var dividends))
+                return [];
+
+            var result = new List<DividendEvent>();
+            foreach (var dividend in dividends.EnumerateObject())
+            {
+                var date = DateTimeOffset.FromUnixTimeSeconds(dividend.Value.GetProperty("date").GetInt64()).UtcDateTime.Date;
+                var amount = dividend.Value.GetProperty("amount").GetDecimal();
+                result.Add(new DividendEvent(date, amount));
+            }
+
+            return [.. result.OrderBy(e => e.Date)];
         }
         catch
         {
