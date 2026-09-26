@@ -2,6 +2,8 @@ using InvestmentPortfolio.Core.Enums;
 using InvestmentPortfolio.Core.Handlers;
 using InvestmentPortfolio.Core.Requests.Patrimony;
 using InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Responses.Commom;
+using InvestmentPortfolio.Core.Responses.Patrimony;
 using InvestmentPortfolio.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 

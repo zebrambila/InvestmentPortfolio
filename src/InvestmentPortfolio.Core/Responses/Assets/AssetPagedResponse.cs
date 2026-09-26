@@ -1,4 +1,6 @@
-namespace InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Responses.Commom;
+
+namespace InvestmentPortfolio.Core.Responses.Assets;
 
 public class AssetPagedResponse : PagedResponse<List<AssetPositionResponse>?>
 {

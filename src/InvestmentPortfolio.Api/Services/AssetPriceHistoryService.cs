@@ -1,5 +1,6 @@
 using InvestmentPortfolio.Core.Entities;
 using InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Responses.Assets;
 using InvestmentPortfolio.Core.Services;
 using InvestmentPortfolio.Infra.Data;
 using Microsoft.EntityFrameworkCore;

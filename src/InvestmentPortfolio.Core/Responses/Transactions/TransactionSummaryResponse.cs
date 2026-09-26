@@ -1,4 +1,4 @@
-namespace InvestmentPortfolio.Core.Responses;
+namespace InvestmentPortfolio.Core.Responses.Transactions;
 
 public class TransactionSummaryResponse
 {

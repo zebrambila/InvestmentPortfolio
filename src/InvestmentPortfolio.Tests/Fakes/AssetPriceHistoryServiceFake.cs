@@ -1,4 +1,5 @@
 using InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Responses.Assets;
 using InvestmentPortfolio.Core.Services;
 
 namespace InvestmentPortfolio.Tests.Fakes;

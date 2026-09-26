@@ -1,6 +1,7 @@
 using InvestmentPortfolio.Core.Entities;
+using InvestmentPortfolio.Core.Responses.Commom;
 
-namespace InvestmentPortfolio.Core.Responses;
+namespace InvestmentPortfolio.Core.Responses.Transactions;
 
 public class TransactionPagedResponse : PagedResponse<List<Transaction>?>
 {

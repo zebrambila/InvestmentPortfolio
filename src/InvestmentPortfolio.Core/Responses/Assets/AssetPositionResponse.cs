@@ -1,6 +1,6 @@
 using InvestmentPortfolio.Core.Enums;
 
-namespace InvestmentPortfolio.Core.Responses;
+namespace InvestmentPortfolio.Core.Responses.Assets;
 
 public class AssetPositionResponse
 {

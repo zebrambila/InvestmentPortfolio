@@ -2,6 +2,7 @@ using InvestmentPortfolio.Core.Entities;
 using InvestmentPortfolio.Core.Handlers;
 using InvestmentPortfolio.Core.Requests.Dividends;
 using InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Responses.Commom;
 
 namespace InvestmentPortfolio.Api.Endpoints.Dividends;
 

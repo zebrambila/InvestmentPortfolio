@@ -1,6 +1,8 @@
 using InvestmentPortfolio.Core.Entities;
 using InvestmentPortfolio.Core.Requests.Transactions;
 using InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Responses.Commom;
+using InvestmentPortfolio.Core.Responses.Transactions;
 
 namespace InvestmentPortfolio.Core.Handlers;
 

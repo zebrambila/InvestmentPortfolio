@@ -1,6 +1,9 @@
 using InvestmentPortfolio.Core.Entities;
 using InvestmentPortfolio.Core.Requests.Dividends;
 using InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Responses.Commom;
+using InvestmentPortfolio.Core.Responses.Dividends;
+using InvestmentPortfolio.Core.Responses.Patrimony;
 
 namespace InvestmentPortfolio.Core.Handlers;
 

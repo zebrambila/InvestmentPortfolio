@@ -4,6 +4,8 @@ using InvestmentPortfolio.Core.Handlers;
 using InvestmentPortfolio.Core.Queries;
 using InvestmentPortfolio.Core.Requests.Transactions;
 using InvestmentPortfolio.Core.Responses;
+using InvestmentPortfolio.Core.Responses.Commom;
+using InvestmentPortfolio.Core.Responses.Transactions;
 using InvestmentPortfolio.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 

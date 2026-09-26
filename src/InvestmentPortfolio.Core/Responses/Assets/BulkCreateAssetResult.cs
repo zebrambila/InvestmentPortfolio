@@ -1,4 +1,4 @@
-namespace InvestmentPortfolio.Core.Responses;
+namespace InvestmentPortfolio.Core.Responses.Assets;
 
 public class BulkCreateAssetResult
 {

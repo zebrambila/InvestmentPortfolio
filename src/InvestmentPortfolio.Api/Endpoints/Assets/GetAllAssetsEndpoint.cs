@@ -2,6 +2,7 @@ using InvestmentPortfolio.Core.Handlers;
 using InvestmentPortfolio.Core.Requests.Assets;
 using InvestmentPortfolio.Core.Responses;
 using InvestmentPortfolio.Core.Entities;
+using InvestmentPortfolio.Core.Responses.Assets;
 
 namespace InvestmentPortfolio.Api.Endpoints.Assets;
 
