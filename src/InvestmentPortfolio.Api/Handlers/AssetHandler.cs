@@ -257,7 +257,10 @@ public class AssetHandler(
                 .ToListAsync(ct);
 
             if (assets.Count == 0)
+            {
+                await RecordExecutionAsync(EJobType.SyncPrices, true, "Nenhum ativo cadastrado", ct);
                 return new Response<int>(0, 200, "Nenhum ativo cadastrado");
+            }
 
             var tickers = assets.Select(a => a.Ticker);
             var prices = await marketDataService.GetCurrentPricesAsync(tickers, ct);
@@ -275,11 +278,58 @@ public class AssetHandler(
             if (updated > 0)
                 await context.SaveChangesAsync(ct);
 
-            return new Response<int>(updated, 200, $"{updated} preço(s) atualizado(s)");
+            var message = $"{updated} preço(s) atualizado(s)";
+            await RecordExecutionAsync(EJobType.SyncPrices, true, message, ct);
+            return new Response<int>(updated, 200, message);
         }
         catch
         {
+            await RecordExecutionAsync(EJobType.SyncPrices, false, "Erro ao sincronizar preços", ct);
             return new Response<int>(0, 500, "Erro ao sincronizar preços");
+        }
+    }
+
+    public async Task<Response<SyncStatusResponse?>> GetSyncStatusAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            var executions = await context.JobExecutions.AsNoTracking().ToListAsync(ct);
+
+            JobExecutionStatusResponse? Map(EJobType type) =>
+                executions.FirstOrDefault(j => j.JobType == type) is { } j
+                    ? new JobExecutionStatusResponse { ExecutedAt = j.ExecutedAt, Success = j.Success, Message = j.Message }
+                    : null;
+
+            var status = new SyncStatusResponse
+            {
+                SyncPrices = Map(EJobType.SyncPrices),
+                BackfillPrices = Map(EJobType.BackfillPrices),
+            };
+
+            return new Response<SyncStatusResponse?>(status, 200);
+        }
+        catch
+        {
+            return new Response<SyncStatusResponse?>(null, 500, "Erro ao buscar status das sincronizações");
+        }
+    }
+
+    // Best effort: falha ao registrar a execução nunca deve quebrar a rotina em si.
+    private async Task RecordExecutionAsync(EJobType jobType, bool success, string message, CancellationToken ct)
+    {
+        try
+        {
+            var execution = await context.JobExecutions.FirstOrDefaultAsync(j => j.JobType == jobType, ct);
+            if (execution is null)
+                context.JobExecutions.Add(new JobExecution(jobType, success, message));
+            else
+                execution.Register(success, message);
+
+            await context.SaveChangesAsync(ct);
+        }
+        catch
+        {
+            // ignorado intencionalmente
         }
     }
 
@@ -288,10 +338,13 @@ public class AssetHandler(
         try
         {
             var result = await priceHistoryService.BackfillAsync(request.Months, ct);
-            return new Response<BackfillPricesResponse?>(result, 200, $"{result.Processed.Count} ativo(s) processado(s), {result.Failed.Count} falha(s)");
+            var message = $"{result.Processed.Count} ativo(s) processado(s), {result.Failed.Count} falha(s)";
+            await RecordExecutionAsync(EJobType.BackfillPrices, true, message, ct);
+            return new Response<BackfillPricesResponse?>(result, 200, message);
         }
         catch
         {
+            await RecordExecutionAsync(EJobType.BackfillPrices, false, "Erro no backfill de histórico de preços", ct);
             return new Response<BackfillPricesResponse?>(null, 500, "Erro no backfill de histórico de preços");
         }
     }

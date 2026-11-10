@@ -129,6 +129,35 @@ namespace InvestmentPortfolio.Infra.Migrations
                     b.ToTable("Dividends", (string)null);
                 });
 
+            modelBuilder.Entity("InvestmentPortfolio.Core.Entities.JobExecution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExecutedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("JobType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobType")
+                        .IsUnique();
+
+                    b.ToTable("JobExecutions", (string)null);
+                });
+
             modelBuilder.Entity("InvestmentPortfolio.Core.Entities.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
